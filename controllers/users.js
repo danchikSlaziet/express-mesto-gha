@@ -1,11 +1,10 @@
 const User = require('../models/user');
+const { ERR404, ERR400, ERR500 } = require('../app');
 
 const getAllUsers = (req, res) => {
   User.find({})
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => res.status(500).send({
-      message: 'Ошибка по умолчанию', name: err.name, error: err.message, stack: err.stack,
-    }));
+    .catch(() => res.status(ERR500).send({ message: 'Ошибка по умолчанию' }));
 };
 const getUserById = (req, res) => {
   User.findById(req.params.userId)
@@ -13,18 +12,18 @@ const getUserById = (req, res) => {
       if (user) {
         res.send({ data: user });
       } else {
-        res.status(404).send({ message: 'Пользователь по указанному ID не найден' });
+        res.status(ERR404).send({ message: 'Пользователь по указанному ID не найден' });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({
-          message: 'Пользователь по указанному ID не найден, либо ID пользователя не подходит под стандарт ObjectID', name: err.name, error: err.message, stack: err.stack,
+        res.status(ERR400).send({
+          message: 'Пользователь по указанному ID не найден, либо ID пользователя не подходит под стандарт ObjectID',
         });
         return;
       }
-      res.status(500).send({
-        message: 'Ошибка по умолчанию', name: err.name, error: err.message, stack: err.stack,
+      res.status(ERR500).send({
+        message: 'Ошибка по умолчанию',
       });
     });
 };
@@ -34,13 +33,13 @@ const addNewUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({
-          message: 'Переданы некорректные данные', name: err.name, error: err.message, stack: err.stack,
+        res.status(ERR400).send({
+          message: 'Переданы некорректные данные',
         });
         return;
       }
-      res.status(500).send({
-        message: 'Ошибка по умолчанию', name: err.name, error: err.message, stack: err.stack,
+      res.status(ERR500).send({
+        message: 'Ошибка по умолчанию',
       });
     });
 };
@@ -52,14 +51,14 @@ const updateProfile = (req, res) => {
       if ((user.name.length < 30 && user.name.length > 1) && (user.about.length < 30 && user.about.length > 1)) {
         res.send({ data: user });
       } else {
-        res.status(400).send({
+        res.status(ERR400).send({
           message: 'Переданы некорректные данные при обновлении профиля',
         });
       }
     })
-    .catch((err) => {
-      res.status(500).send({
-        message: 'Ошибка по умлочанию', name: err.name, error: err.message, stack: err.stack,
+    .catch(() => {
+      res.status(ERR500).send({
+        message: 'Ошибка по умлочанию',
       });
     });
 };
@@ -67,7 +66,7 @@ const updateAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(() => res.status(ERR500).send({ message: 'Ошибка по умлочанию' }));
 };
 module.exports = {
   getAllUsers,

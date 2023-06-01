@@ -1,11 +1,10 @@
 const Card = require('../models/card');
+const { ERR404, ERR400, ERR500 } = require('../app');
 
 const getAllCards = (req, res) => {
   Card.find({})
     .then((card) => res.status(200).send({ data: card }))
-    .catch((err) => res.status(500).send({
-      message: 'Ошибка по умолчанию', name: err.name, error: err.message, stack: err.stack,
-    }));
+    .catch(() => res.status(ERR500).send({ message: 'Ошибка по умолчанию' }));
 };
 const addNewCard = (req, res) => {
   const { name, link } = req.body;
@@ -14,14 +13,10 @@ const addNewCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({
-          message: 'Переданы некорректные данные', name: err.name, error: err.message, stack: err.stack,
-        });
+        res.status(ERR400).send({ message: 'Переданы некорректные данные' });
         return;
       }
-      res.status(500).send({
-        message: 'Ошибка по умолчанию', name: err.name, error: err.message, stack: err.stack,
-      });
+      res.status(ERR500).send({ message: 'Ошибка по умолчанию' });
     });
 };
 const deleteCard = (req, res) => {
@@ -32,13 +27,11 @@ const deleteCard = (req, res) => {
       } else {
         // Почему-то при несуществующем ID может возвращаться
         // ответ null, поэтому пришлось сделать этот блок if/else
-        res.status(404).send({ message: 'Карточка с данным ID не найдена' });
+        res.status(ERR404).send({ message: 'Карточка с данным ID не найдена' });
       }
     })
-    .catch((err) => {
-      res.status(400).send({
-        message: 'Карточка с данным ID не найдена', name: err.name, error: err.message, stack: err.stack,
-      });
+    .catch(() => {
+      res.status(ERR400).send({ message: 'Карточка с данным ID не найдена' });
     });
 };
 const likeCard = (req, res) => {
@@ -51,19 +44,15 @@ const likeCard = (req, res) => {
       if (card) {
         res.send({ data: card });
       } else {
-        res.status(404).send({ message: 'Карточка с данным ID не найдена' });
+        res.status(ERR404).send({ message: 'Карточка с данным ID не найдена' });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({
-          message: 'ID карточки не подходит под стандарт ObjectID', name: err.name, error: err.message, stack: err.stack,
-        });
+        res.status(ERR400).send({ message: 'ID карточки не подходит под стандарт ObjectID' });
         return;
       }
-      res.status(500).send({
-        message: 'Ошибка по умолчанию', name: err.name, error: err.message, stack: err.stack,
-      });
+      res.status(ERR500).send({ message: 'Ошибка по умолчанию' });
     });
 };
 const dislikeCard = (req, res) => {
@@ -76,18 +65,16 @@ const dislikeCard = (req, res) => {
       if (card) {
         res.send({ data: card });
       } else {
-        res.status(404).send({ message: 'Карточка с данным ID не найдена' });
+        res.status(ERR404).send({ message: 'Карточка с данным ID не найдена' });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({
-          message: 'ID карточки не подходит под стандарт ObjectID', name: err.name, error: err.message, stack: err.stack,
-        });
+        res.status(ERR400).send({ message: 'ID карточки не подходит под стандарт ObjectID' });
         return;
       }
-      res.status(500).send({
-        message: 'Ошибка по умолчанию', name: err.name, error: err.message, stack: err.stack,
+      res.status(ERR500).send({
+        message: 'Ошибка по умолчанию',
       });
     });
 };
