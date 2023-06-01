@@ -1,5 +1,7 @@
 const Card = require('../models/card');
-const { ERR404, ERR400, ERR500 } = require('../app');
+
+const ERR400 = 400;
+const ERR500 = 500;
 
 const getAllCards = (req, res) => {
   Card.find({})

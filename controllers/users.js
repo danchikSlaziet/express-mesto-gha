@@ -1,5 +1,7 @@
 const User = require('../models/user');
-const { ERR404, ERR400, ERR500 } = require('../app');
+
+const ERR400 = 400;
+const ERR500 = 500;
 
 const getAllUsers = (req, res) => {
   User.find({})
