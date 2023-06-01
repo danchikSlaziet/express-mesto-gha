@@ -1,12 +1,13 @@
 const Card = require('../models/card');
 
+const ERR404 = 404;
 const ERR400 = 400;
 const ERR500 = 500;
 
 const getAllCards = (req, res) => {
   Card.find({})
     .then((card) => res.status(200).send({ data: card }))
-    .catch(() => res.status(ERR500).send({ message: 'Ошибка по умолчанию' }));
+    .catch(() => res.status(ERR500).send({ message: 'На сервере произошла ошибка' }));
 };
 const addNewCard = (req, res) => {
   const { name, link } = req.body;
@@ -18,7 +19,7 @@ const addNewCard = (req, res) => {
         res.status(ERR400).send({ message: 'Переданы некорректные данные' });
         return;
       }
-      res.status(ERR500).send({ message: 'Ошибка по умолчанию' });
+      res.status(ERR500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 const deleteCard = (req, res) => {
@@ -54,7 +55,7 @@ const likeCard = (req, res) => {
         res.status(ERR400).send({ message: 'ID карточки не подходит под стандарт ObjectID' });
         return;
       }
-      res.status(ERR500).send({ message: 'Ошибка по умолчанию' });
+      res.status(ERR500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 const dislikeCard = (req, res) => {
@@ -76,7 +77,7 @@ const dislikeCard = (req, res) => {
         return;
       }
       res.status(ERR500).send({
-        message: 'Ошибка по умолчанию',
+        message: 'На сервере произошла ошибка',
       });
     });
 };

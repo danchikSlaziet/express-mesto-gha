@@ -1,12 +1,13 @@
 const User = require('../models/user');
 
+const ERR404 = 404;
 const ERR400 = 400;
 const ERR500 = 500;
 
 const getAllUsers = (req, res) => {
   User.find({})
     .then((user) => res.status(200).send({ data: user }))
-    .catch(() => res.status(ERR500).send({ message: 'Ошибка по умолчанию' }));
+    .catch(() => res.status(ERR500).send({ message: 'На сервере произошла ошибка' }));
 };
 const getUserById = (req, res) => {
   User.findById(req.params.userId)
@@ -25,7 +26,7 @@ const getUserById = (req, res) => {
         return;
       }
       res.status(ERR500).send({
-        message: 'Ошибка по умолчанию',
+        message: 'На сервере произошла ошибка',
       });
     });
 };
@@ -41,7 +42,7 @@ const addNewUser = (req, res) => {
         return;
       }
       res.status(ERR500).send({
-        message: 'Ошибка по умолчанию',
+        message: 'На сервере произошла ошибка',
       });
     });
 };
