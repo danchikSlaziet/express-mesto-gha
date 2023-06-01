@@ -32,11 +32,11 @@ const deleteCard = (req, res) => {
       } else {
         // Почему-то при несуществующем ID может возвращаться
         // ответ null, поэтому пришлось сделать этот блок if/else
-        res.status(404).send({ message: 'Карточка с данным ID не найдена' });
+        res.status(400).send({ message: 'Карточка с данным ID не найдена' });
       }
     })
     .catch((err) => {
-      res.status(404).send({
+      res.status(400).send({
         message: 'Карточка с данным ID не найдена', name: err.name, error: err.message, stack: err.stack,
       });
     });

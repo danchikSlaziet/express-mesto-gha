@@ -18,7 +18,7 @@ const getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(404).send({
+        res.status(400).send({
           message: 'Пользователь по указанному ID не найден, либо ID пользователя не подходит под стандарт ObjectID', name: err.name, error: err.message, stack: err.stack,
         });
         return;
@@ -46,7 +46,7 @@ const addNewUser = (req, res) => {
 };
 const updateProfile = (req, res) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about }, { new: false })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
     .then((user) => {
       // eslint-disable-next-line max-len
       if ((user.name.length < 30 && user.name.length > 1) && (user.about.length < 30 && user.about.length > 1)) {
