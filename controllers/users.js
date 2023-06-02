@@ -1,12 +1,10 @@
 const User = require('../models/user');
 
-const ERR404 = 404;
-const ERR400 = 400;
-const ERR500 = 500;
+const { ERR404, ERR400, ERR500 } = require('../utils/error-codes');
 
 const getAllUsers = (req, res) => {
   User.find({})
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.send({ data: user }))
     .catch(() => res.status(ERR500).send({ message: 'На сервере произошла ошибка' }));
 };
 const getUserById = (req, res) => {
@@ -48,18 +46,23 @@ const addNewUser = (req, res) => {
 };
 const updateProfile = (req, res) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
-      // eslint-disable-next-line max-len
-      if ((user.name.length < 30 && user.name.length > 1) && (user.about.length < 30 && user.about.length > 1)) {
+      if (user) {
         res.send({ data: user });
       } else {
-        res.status(ERR400).send({
+        res.status(ERR404).send({
           message: 'Переданы некорректные данные при обновлении профиля',
         });
       }
     })
-    .catch(() => {
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(ERR400).send({
+          message: 'Переданы некорректные данные при обновлении профиля',
+        });
+        return;
+      }
       res.status(ERR500).send({
         message: 'Ошибка по умлочанию',
       });
@@ -67,9 +70,14 @@ const updateProfile = (req, res) => {
 };
 const updateAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(ERR500).send({ message: 'Ошибка по умлочанию' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(ERR400).send({ message: 'Переданы некорректные данные при обновлении аватара' });
+      }
+      res.status(ERR500).send({ message: 'Ошибка по умлочанию' });
+    });
 };
 module.exports = {
   getAllUsers,

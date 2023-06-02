@@ -1,12 +1,10 @@
 const Card = require('../models/card');
 
-const ERR404 = 404;
-const ERR400 = 400;
-const ERR500 = 500;
+const { ERR404, ERR400, ERR500 } = require('../utils/error-codes');
 
 const getAllCards = (req, res) => {
   Card.find({})
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.send({ data: card }))
     .catch(() => res.status(ERR500).send({ message: 'На сервере произошла ошибка' }));
 };
 const addNewCard = (req, res) => {
@@ -33,8 +31,12 @@ const deleteCard = (req, res) => {
         res.status(ERR404).send({ message: 'Карточка с данным ID не найдена' });
       }
     })
-    .catch(() => {
-      res.status(ERR400).send({ message: 'Карточка с данным ID не найдена' });
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERR400).send({ message: 'Карточка с данным ID не найдена' });
+      } else {
+        res.status(ERR500).send({ message: 'На сервере произошла ошибка' });
+      }
     });
 };
 const likeCard = (req, res) => {

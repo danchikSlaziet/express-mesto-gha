@@ -6,10 +6,8 @@ const cardRouter = require('./routes/cards');
 const { PORT = 3000 } = process.env;
 const app = express();
 
-const ERR404 = 404;
+const ERR404 = require('./utils/error-codes');
 
-// eslint-disable-next-line max-len
-// почему-то монгоДБ по 127.0.0.1 подключается, если надо, попробую в конфиге или package.json(короче хз где) поправить это
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb')
   .then(() => console.log('MongoDB подключён'))
   .catch(() => console.log('MongoDB не подключён'));
