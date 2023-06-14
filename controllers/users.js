@@ -1,7 +1,27 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const { ERR404, ERR400, ERR500 } = require('../utils/error-codes');
 
+const getYourself = (req, res) => {
+  User.findById(req.user._id)
+    .then((user) => res.send(user))
+    .catch(() => res.send({ message: 'ошибка в контроллере getyourself' }));
+};
+const login = (req, res) => {
+  const { password, email } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      res.send({ user });
+    })
+    .catch((err) => {
+      res
+        .status(401)
+        .send({ message: err.message });
+    });
+};
 const getAllUsers = (req, res) => {
   User.find({})
     .then((user) => res.send({ data: user }))
@@ -28,10 +48,19 @@ const getUserById = (req, res) => {
       });
     });
 };
-const addNewUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+const createUser = (req, res) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      User.create({
+        name, about, avatar, email, password: hash,
+      });
+    })
+    .then((user) => res.status(201).send({
+      user,
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERR400).send({
@@ -82,7 +111,9 @@ const updateAvatar = (req, res) => {
 module.exports = {
   getAllUsers,
   getUserById,
-  addNewUser,
+  createUser,
   updateProfile,
   updateAvatar,
+  login,
+  getYourself,
 };
