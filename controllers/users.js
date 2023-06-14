@@ -13,13 +13,40 @@ const login = (req, res) => {
   const { password, email } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
+      res.cookie('jwt', token, {
+        httpOnly: true,
+      });
       res.send({ user });
     })
     .catch((err) => {
       res
         .status(401)
         .send({ message: err.message });
+    });
+};
+const createUser = (req, res) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
+    .then((user) => {
+      res.status(201).send(user);
+    })
+    .catch((err) => {
+      // if (err.name === 'ValidationError') {
+      //   res.status(ERR400).send({
+      //     message: 'Переданы некорректные данные',
+      //   });
+      //   return;
+      // }
+      // res.status(ERR500).send({
+      //   message: 'На сервере произошла ошибка', newMess: err.message,
+      // });
+      res.status(400).send(err);
     });
 };
 const getAllUsers = (req, res) => {
@@ -40,31 +67,6 @@ const getUserById = (req, res) => {
       if (err.name === 'CastError') {
         res.status(ERR400).send({
           message: 'Пользователь по указанному ID не найден, либо ID пользователя не подходит под стандарт ObjectID',
-        });
-        return;
-      }
-      res.status(ERR500).send({
-        message: 'На сервере произошла ошибка',
-      });
-    });
-};
-const createUser = (req, res) => {
-  const {
-    name, about, avatar, email, password,
-  } = req.body;
-  bcrypt.hash(password, 10)
-    .then((hash) => {
-      User.create({
-        name, about, avatar, email, password: hash,
-      });
-    })
-    .then((user) => res.status(201).send({
-      user,
-    }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERR400).send({
-          message: 'Переданы некорректные данные',
         });
         return;
       }
