@@ -11,7 +11,9 @@ const addNewCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      res.send({ data: card });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERR400).send({ message: 'Переданы некорректные данные' });
@@ -21,14 +23,16 @@ const addNewCard = (req, res) => {
     });
 };
 const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
-      if (card) {
-        res.send({ data: card });
+      if (card.owner.toString() === req.user._id.toString()) {
+        Card.findByIdAndRemove(req.params.cardId)
+          .then((cardItem) => res.send({ data: cardItem }))
+          .catch((err) => res.status(404).send(err));
       } else {
         // Почему-то при несуществующем ID может возвращаться
         // ответ null, поэтому пришлось сделать этот блок if/else
-        res.status(ERR404).send({ message: 'Карточка с данным ID не найдена' });
+        res.status(ERR404).send({ message: 'у вас нет прав на удаление чужой карточки' });
       }
     })
     .catch((err) => {
