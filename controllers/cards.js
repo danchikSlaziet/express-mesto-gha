@@ -1,4 +1,4 @@
-const Error404 = require('../errors/Error400');
+const Error404 = require('../errors/Error404');
 const Card = require('../models/card');
 
 const { ERR404 } = require('../utils/error-codes');

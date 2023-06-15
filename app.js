@@ -46,19 +46,19 @@ app.use((err, req, res, next) => {
     res.status(409).send({ message: 'Аккаунт с этой почтой уже зарегистрирован' });
   }
   if (err.name === 'ValidationError') {
-    res.status(400).send({ message: 'Переданы некорректные данные' });
+    res.status(400).send({ message: err.message });
   }
   if (err.name === 'CastError') {
-    res.status(404).send({ message: 'Пользователь по указанному ID не найден, либо ID пользователя не подходит под стандарт ObjectID' });
+    res.status(400).send({ message: err.message });
   }
   if (err.statusCode === 404) {
-    res.status(err.statusCode).send({ message: 'Такого пользователя нет в БД' });
+    res.status(err.statusCode).send({ message: err.message });
   }
   if (err.statusCode === 401) {
     res.status(err.statusCode).send({ message: err.message });
   }
   if (err.statusCode === 400) {
-    res.status(err.statusCode).send({ message: 'Некорректный mail' });
+    res.status(err.statusCode).send({ message: err.message });
   }
   res.status(err.statusCode).send({ message: err.message });
   next();
