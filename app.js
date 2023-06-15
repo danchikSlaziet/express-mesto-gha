@@ -10,8 +10,6 @@ const auth = require('./middlewares/auth');
 const { PORT = 3000 } = process.env;
 const app = express();
 
-const { ERR404 } = require('./utils/error-codes');
-
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb')
   .then(() => console.log('MongoDB подключён'))
   .catch(() => console.log('MongoDB не подключён'));
@@ -38,7 +36,7 @@ app.use(auth);
 app.use('/users', userRouter);
 app.use('/', cardRouter);
 app.use('/*', (req, res) => {
-  res.status(ERR404).send({ message: 'Кривой маршрут, прочитайте документацию к API' });
+  res.status(404).send({ message: 'Кривой маршрут, прочитайте документацию к API' });
 });
 app.use(errors());
 app.use((err, req, res, next) => {
