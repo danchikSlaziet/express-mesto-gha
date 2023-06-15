@@ -1,4 +1,4 @@
-const Error400 = require('../errors/Error400');
+const Error404 = require('../errors/Error400');
 const Card = require('../models/card');
 
 const { ERR404 } = require('../utils/error-codes');
@@ -21,7 +21,7 @@ const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new Error400('Карточка с данным ID не найдена');
+        throw new Error404('Карточка с данным ID не найдена');
       } else if (card.owner.toString() === req.user._id.toString()) {
         Card.findByIdAndRemove(req.params.cardId)
           .then((cardItem) => res.send({ data: cardItem }))
@@ -29,7 +29,7 @@ const deleteCard = (req, res, next) => {
       } else {
         // Почему-то при несуществующем ID может возвращаться
         // ответ null, поэтому пришлось сделать этот блок if/else
-        res.status(ERR404).send({ message: 'у вас нет прав на удаление чужой карточки' });
+        res.status(403).send({ message: 'у вас нет прав на удаление чужой карточки' });
       }
     })
     .catch(next);

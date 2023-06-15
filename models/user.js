@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const isEmail = require('validator/lib/isEmail');
 const bcrypt = require('bcryptjs');
-const Error404 = require('../errors/Error404');
+const Error400 = require('../errors/Error400');
 const Error401 = require('../errors/Error401');
 
 const userSchema = new mongoose.Schema({
@@ -41,12 +41,12 @@ userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw new Error404('Такой пользователь не найден');
+        throw new Error401('Такой пользователь не найден');
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            throw new Error401('Неверные логин или пароль');
+            throw new Error400('Неверные логин или пароль');
           }
           return user;
         });
