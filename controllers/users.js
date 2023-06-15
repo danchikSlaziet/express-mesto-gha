@@ -2,8 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const { ERR404 } = require('../utils/error-codes');
-
 const getYourself = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => res.send(user))
@@ -47,7 +45,7 @@ const getUserById = (req, res, next) => {
       if (user) {
         res.send({ data: user });
       } else {
-        res.status(ERR404).send({ message: 'Пользователь по указанному ID не найден' });
+        res.status(404).send({ message: 'Пользователь по указанному ID не найден' });
       }
     })
     .catch(next);
@@ -59,7 +57,7 @@ const updateProfile = (req, res, next) => {
       if (user) {
         res.send({ data: user });
       } else {
-        res.status(ERR404).send({
+        res.status(404).send({
           message: 'Переданы некорректные данные при обновлении профиля',
         });
       }

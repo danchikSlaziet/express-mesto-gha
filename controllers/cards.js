@@ -1,8 +1,6 @@
 const Error404 = require('../errors/Error404');
 const Card = require('../models/card');
 
-const { ERR404 } = require('../utils/error-codes');
-
 const getAllCards = (req, res, next) => {
   Card.find({})
     .then((card) => res.send({ data: card }))
@@ -44,7 +42,7 @@ const likeCard = (req, res, next) => {
       if (card) {
         res.send({ data: card });
       } else {
-        res.status(ERR404).send({ message: 'Карточка с данным ID не найдена' });
+        res.status(404).send({ message: 'Карточка с данным ID не найдена' });
       }
     })
     .catch(next);
@@ -59,7 +57,7 @@ const dislikeCard = (req, res, next) => {
       if (card) {
         res.send({ data: card });
       } else {
-        res.status(ERR404).send({ message: 'Карточка с данным ID не найдена' });
+        res.status(404).send({ message: 'Карточка с данным ID не найдена' });
       }
     })
     .catch(next);

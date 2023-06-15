@@ -42,6 +42,7 @@ app.use('/*', (req, res) => {
 });
 app.use(errors());
 app.use((err, req, res, next) => {
+  // сорян за повторения, после 1-ой проверки будет всё DRY
   if (err.code === 11000) {
     res.status(409).send({ message: 'Аккаунт с этой почтой уже зарегистрирован' });
   } else if (err.name === 'ValidationError') {
