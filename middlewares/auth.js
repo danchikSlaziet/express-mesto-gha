@@ -14,10 +14,10 @@ const auth = (req, res, next) => {
   } catch (err) {
     return res
       .status(401)
-      .send({ message: 'Необходима авторизация' });
+      .send({ message: 'Передан неверный jwt' });
   }
   req.user = payload;
-  next();
+  return next();
 };
 
 module.exports = auth;

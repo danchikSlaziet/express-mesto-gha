@@ -1,49 +1,40 @@
+const Error400 = require('../errors/Error400');
 const Card = require('../models/card');
 
-const { ERR404, ERR400, ERR500 } = require('../utils/error-codes');
+const { ERR404 } = require('../utils/error-codes');
 
-const getAllCards = (req, res) => {
+const getAllCards = (req, res, next) => {
   Card.find({})
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(ERR500).send({ message: 'На сервере произошла ошибка' }));
+    .catch(next);
 };
-const addNewCard = (req, res) => {
+const addNewCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => {
       res.send({ data: card });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERR400).send({ message: 'Переданы некорректные данные' });
-        return;
-      }
-      res.status(ERR500).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
-      if (card.owner.toString() === req.user._id.toString()) {
+      if (!card) {
+        throw new Error400('Карточка с данным ID не найдена');
+      } else if (card.owner.toString() === req.user._id.toString()) {
         Card.findByIdAndRemove(req.params.cardId)
           .then((cardItem) => res.send({ data: cardItem }))
-          .catch((err) => res.status(404).send(err));
+          .catch(next);
       } else {
         // Почему-то при несуществующем ID может возвращаться
         // ответ null, поэтому пришлось сделать этот блок if/else
         res.status(ERR404).send({ message: 'у вас нет прав на удаление чужой карточки' });
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERR400).send({ message: 'Карточка с данным ID не найдена' });
-      } else {
-        res.status(ERR500).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
 };
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -56,15 +47,9 @@ const likeCard = (req, res) => {
         res.status(ERR404).send({ message: 'Карточка с данным ID не найдена' });
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERR400).send({ message: 'ID карточки не подходит под стандарт ObjectID' });
-        return;
-      }
-      res.status(ERR500).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
@@ -77,15 +62,7 @@ const dislikeCard = (req, res) => {
         res.status(ERR404).send({ message: 'Карточка с данным ID не найдена' });
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERR400).send({ message: 'ID карточки не подходит под стандарт ObjectID' });
-        return;
-      }
-      res.status(ERR500).send({
-        message: 'На сервере произошла ошибка',
-      });
-    });
+    .catch(next);
 };
 module.exports = {
   getAllCards,

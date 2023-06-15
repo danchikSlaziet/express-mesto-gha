@@ -2,14 +2,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const { ERR404, ERR400, ERR500 } = require('../utils/error-codes');
+const { ERR404 } = require('../utils/error-codes');
 
-const getYourself = (req, res) => {
+const getYourself = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => res.send(user))
-    .catch(() => res.send({ message: 'ошибка в контроллере getyourself' }));
+    .catch(next);
 };
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { password, email } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -19,13 +19,9 @@ const login = (req, res) => {
       });
       res.send({ user });
     })
-    .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
+    .catch(next);
 };
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -33,28 +29,19 @@ const createUser = (req, res) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => {
-      res.status(201).send(user);
+    .then(() => {
+      res.status(201).send({
+        name, about, avatar, email,
+      });
     })
-    .catch((err) => {
-      // if (err.name === 'ValidationError') {
-      //   res.status(ERR400).send({
-      //     message: 'Переданы некорректные данные',
-      //   });
-      //   return;
-      // }
-      // res.status(ERR500).send({
-      //   message: 'На сервере произошла ошибка', newMess: err.message,
-      // });
-      res.status(400).send(err);
-    });
+    .catch(next);
 };
-const getAllUsers = (req, res) => {
+const getAllUsers = (req, res, next) => {
   User.find({})
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(ERR500).send({ message: 'На сервере произошла ошибка' }));
+    .catch(next);
 };
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (user) {
@@ -63,19 +50,9 @@ const getUserById = (req, res) => {
         res.status(ERR404).send({ message: 'Пользователь по указанному ID не найден' });
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERR400).send({
-          message: 'Пользователь по указанному ID не найден, либо ID пользователя не подходит под стандарт ObjectID',
-        });
-        return;
-      }
-      res.status(ERR500).send({
-        message: 'На сервере произошла ошибка',
-      });
-    });
+    .catch(next);
 };
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
@@ -87,28 +64,13 @@ const updateProfile = (req, res) => {
         });
       }
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERR400).send({
-          message: 'Переданы некорректные данные при обновлении профиля',
-        });
-        return;
-      }
-      res.status(ERR500).send({
-        message: 'Ошибка по умлочанию',
-      });
-    });
+    .catch(next);
 };
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERR400).send({ message: 'Переданы некорректные данные при обновлении аватара' });
-      }
-      res.status(ERR500).send({ message: 'Ошибка по умлочанию' });
-    });
+    .catch(next);
 };
 module.exports = {
   getAllUsers,
