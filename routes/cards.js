@@ -14,6 +14,7 @@ router.delete('/cards/:cardId', celebrate({
 router.post('/cards', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
+    link: Joi.string().required(),
   }),
 }), addNewCard);
 router.put('/cards/:cardId/likes', celebrate({
