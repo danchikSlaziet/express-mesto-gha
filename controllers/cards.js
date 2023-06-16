@@ -1,3 +1,4 @@
+const Error403 = require('../errors/Error403');
 const Error404 = require('../errors/Error404');
 const Card = require('../models/card');
 
@@ -25,9 +26,7 @@ const deleteCard = (req, res, next) => {
           .then((cardItem) => res.send({ data: cardItem }))
           .catch(next);
       } else {
-        // Почему-то при несуществующем ID может возвращаться
-        // ответ null, поэтому пришлось сделать этот блок if/else
-        res.status(403).send({ message: 'у вас нет прав на удаление чужой карточки' });
+        throw new Error403('у вас нет прав на удаление чужой карточки');
       }
     })
     .catch(next);
@@ -42,7 +41,7 @@ const likeCard = (req, res, next) => {
       if (card) {
         res.send({ data: card });
       } else {
-        res.status(404).send({ message: 'Карточка с данным ID не найдена' });
+        throw new Error404('Карточка с данным ID не найдена');
       }
     })
     .catch(next);
@@ -57,7 +56,7 @@ const dislikeCard = (req, res, next) => {
       if (card) {
         res.send({ data: card });
       } else {
-        res.status(404).send({ message: 'Карточка с данным ID не найдена' });
+        throw new Error404('Карточка с данным ID не найдена');
       }
     })
     .catch(next);

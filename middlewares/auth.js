@@ -1,20 +1,17 @@
 const jwt = require('jsonwebtoken');
+const Error401 = require('../errors/Error401');
 
 const auth = (req, res, next) => {
   const { cookie } = req.headers;
   if (!cookie || !cookie.startsWith('jwt=')) {
-    return res
-      .status(401)
-      .send({ message: 'Необходима авторизация' });
+    next(new Error401('Необходима авторизация'));
   }
   const token = cookie.replace('jwt=', '');
   let payload;
   try {
     payload = jwt.verify(token, 'secret-key');
   } catch (err) {
-    return res
-      .status(401)
-      .send({ message: 'Передан неверный jwt' });
+    throw new Error401('Передан неверный jwt');
   }
   req.user = payload;
   return next();

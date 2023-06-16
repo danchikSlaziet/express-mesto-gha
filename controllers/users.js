@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const Error404 = require('../errors/Error404');
 
 const getYourself = (req, res, next) => {
   User.findById(req.user._id)
@@ -15,7 +16,7 @@ const login = (req, res, next) => {
       res.cookie('jwt', token, {
         httpOnly: true,
       });
-      res.send({ user });
+      res.send({ мыло: email, ID: user._id });
     })
     .catch(next);
 };
@@ -45,7 +46,7 @@ const getUserById = (req, res, next) => {
       if (user) {
         res.send({ data: user });
       } else {
-        res.status(404).send({ message: 'Пользователь по указанному ID не найден' });
+        throw new Error404('Карточка с данным ID не найдена');
       }
     })
     .catch(next);
@@ -57,9 +58,7 @@ const updateProfile = (req, res, next) => {
       if (user) {
         res.send({ data: user });
       } else {
-        res.status(404).send({
-          message: 'Переданы некорректные данные при обновлении профиля',
-        });
+        throw new Error404('Переданы некорректные данные при обновлении профиля');
       }
     })
     .catch(next);
@@ -67,7 +66,13 @@ const updateProfile = (req, res, next) => {
 const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      if (user) {
+        res.send({ data: user });
+      } else {
+        throw new Error404('Переданы некорректные данные при обновлении аватара');
+      }
+    })
     .catch(next);
 };
 module.exports = {

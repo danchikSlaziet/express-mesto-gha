@@ -6,6 +6,7 @@ const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const Error404 = require('./errors/Error404');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -35,23 +36,18 @@ app.use(auth);
 
 app.use('/users', userRouter);
 app.use('/', cardRouter);
-app.use('/*', (req, res) => {
-  res.status(404).send({ message: 'Кривой маршрут, прочитайте документацию к API' });
+app.use('/*', (req, res, next) => {
+  next(new Error404('Кривой маршрут, прочитайте документацию к API'));
 });
 app.use(errors());
 app.use((err, req, res, next) => {
-  // сорян за повторения, после 1-ой проверки будет всё DRY
   if (err.code === 11000) {
     res.status(409).send({ message: 'Аккаунт с этой почтой уже зарегистрирован' });
   } else if (err.name === 'ValidationError') {
     res.status(400).send({ message: err.message });
   } else if (err.name === 'CastError') {
     res.status(400).send({ message: err.message });
-  } else if (err.statusCode === 404) {
-    res.status(err.statusCode).send({ message: err.message });
-  } else if (err.statusCode === 401) {
-    res.status(err.statusCode).send({ message: err.message });
-  } else if (err.statusCode === 400) {
+  } else if (err.statusCode === 404 || err.statusCode === 401 || err.statusCode === 400) {
     res.status(err.statusCode).send({ message: err.message });
   } else {
     res.status(err.statusCode).send({ message: err.message });
