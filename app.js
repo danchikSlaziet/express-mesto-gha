@@ -47,12 +47,12 @@ app.use((err, req, res, next) => {
     res.status(400).send({ message: err.message });
   } else if (err.name === 'CastError') {
     res.status(400).send({ message: err.message });
-  } else if (err.statusCode === 404 || err.statusCode === 401 || err.statusCode === 400) {
+  } else if (err.statusCode === 404 || err.statusCode === 401
+    || err.statusCode === 400 || err.statusCode === 403) {
     res.status(err.statusCode).send({ message: err.message });
   } else {
-    res.status(err.statusCode).send({ message: err.message });
+    res.status(500).send({ message: 'Непредвиденная ошибка сервера' });
   }
-  res.status(500).send({ message: 'Непредвиденная ошибка сервера' });
   next();
 });
 app.listen(PORT, () => {

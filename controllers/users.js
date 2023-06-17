@@ -16,7 +16,7 @@ const login = (req, res, next) => {
       res.cookie('jwt', token, {
         httpOnly: true,
       });
-      res.send({ мыло: email, ID: user._id });
+      res.send({ mail: email, ID: user._id });
     })
     .catch(next);
 };
